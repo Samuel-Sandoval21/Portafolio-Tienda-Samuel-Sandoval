@@ -15,13 +15,14 @@ import lombok.Data;
 @Entity
 @Table(name="categoria")
 
+
 /**
  *
  * @author HP
  */
 public class Categoria implements Serializable{
     
-    private static final long serialVersionUID = 1L;
+     private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -58,6 +59,3 @@ public class Categoria implements Serializable{
         this.activo = activo;
     }
 }
-
-    
-
