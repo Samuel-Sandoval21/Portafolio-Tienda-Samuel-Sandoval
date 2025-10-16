@@ -8,7 +8,14 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import java.io.Serializable;
 import java.time.LocalDateTime;
-//import java.util.List;
+import java.util.List;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.Data;
 
 @Data
@@ -21,7 +28,7 @@ import lombok.Data;
  * @author HP
  */
 public class Categoria implements Serializable{
-    
+    //Se recomienda añadir un serialVersionUID
      private static final long serialVersionUID = 1L;
 
     @Id
@@ -29,33 +36,16 @@ public class Categoria implements Serializable{
     @Column(name = "id_categoria")
     private Long idCategoria;
 
-    @NotBlank(message = "La descripción no puede estar vacía")
-    @Size(max = 50, message = "La descripción no puede exceder los 50 caracteres")
-    @Column(length = 50, nullable = false, unique = true)
+    @Column (unique = true, nullable = false, length = 50)
     private String descripcion;
-
-    @Size(max = 1024, message = "La ruta de la imagen no puede exceder los 1024 caracteres")
-    @Column(name = "ruta_imagen", length = 1024)
+    
+    @Column (length = 1024)
     private String rutaImagen;
+    
+    @Column (name = "activo")
+    private Boolean activo;
 
-    @Column(nullable = false)
-    private boolean activo;
-
-    @Column(name = "fecha_creacion", updatable = false, insertable = false)
-    private LocalDateTime fechaCreacion;
-
-    @Column(name = "fecha_modificacion", insertable = false, updatable = false)
-    private LocalDateTime fechaModificacion;
-
-//    @OneToMany
-//    @JoinColumn(name = "id_categoria", updatable = false, insertable = false)
-//    private List<Producto> productos;
-
-    public Categoria() {
+    //Realación de uno a muchos con la clase Producto
+    @OneToMany(mappedBy = "categoria")
+    private List<Producto>productos;
     }
-
-    public Categoria(String descripcion, boolean activo) {
-        this.descripcion = descripcion;
-        this.activo = activo;
-    }
-}
