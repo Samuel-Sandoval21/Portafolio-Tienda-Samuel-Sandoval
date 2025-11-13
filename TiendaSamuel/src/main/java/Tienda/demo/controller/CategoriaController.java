@@ -3,15 +3,12 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package Tienda.demo.controller;
-import Tienda.demo.service.CategoriaService;
-import Tienda.demo.domain.Categoria; 
-import Tienda.demo.service.CategoriaService;
 
+import Tienda.demo.domain.Categoria;
+import Tienda.demo.service.CategoriaService;
 import java.util.Locale;
 import java.util.Optional;
-
 import jakarta.validation.Valid;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
@@ -24,16 +21,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-
 @Controller
 @RequestMapping("/categoria")
-
-
-/**
- * @author HP
- */
 public class CategoriaController {
-     @Autowired
+    
+    @Autowired
     private CategoriaService categoriaService;
 
     @Autowired
@@ -44,7 +36,7 @@ public class CategoriaController {
         var categorias = categoriaService.getCategorias(false);
         model.addAttribute("categorias", categorias);
         model.addAttribute("totalCategorias", categorias.size());
-        return "/categoria/listado";
+        return "categoria/listado"; // ← CORREGIDO: Sin barra inicial
     }
 
     @PostMapping("/guardar")
@@ -60,7 +52,7 @@ public class CategoriaController {
     }
 
     @PostMapping("/eliminar")
-    public String eliminar(@RequestParam Integer idCategoria,
+    public String eliminar(@RequestParam Long idCategoria, // ← CORREGIDO: Long
                            RedirectAttributes redirectAttributes) {
         String titulo = "todoOk";
         String detalle = "mensaje.eliminado";
@@ -85,7 +77,7 @@ public class CategoriaController {
     }
 
     @GetMapping("/modificar/{idCategoria}")
-    public String modificar(@PathVariable("idCategoria") Integer idCategoria,
+    public String modificar(@PathVariable("idCategoria") Long idCategoria, // ← CORREGIDO: Long
                             Model model,
                             RedirectAttributes redirectAttributes) {
 
@@ -98,6 +90,6 @@ public class CategoriaController {
         }
 
         model.addAttribute("categoria", categoriaOpt.get());
-        return "/categoria/modifica";
+        return "categoria/modifica"; // ← CORREGIDO: Sin barra inicial
     }
 }

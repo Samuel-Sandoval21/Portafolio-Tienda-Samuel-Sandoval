@@ -1,5 +1,5 @@
-
 package Tienda.demo.service;
+
 import Tienda.demo.domain.Categoria;
 import Tienda.demo.repository.CategoriaRepository;
 import java.util.List;
@@ -11,20 +11,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-
-
-/**
- *
- * @author HP
- */
-
 @Service
-
 public class CategoriaService {
-     @Autowired
+    
+    @Autowired
     private CategoriaRepository categoriaRepository;
     
-    @Transactional(readOnly=true)
+    @Autowired
+    private FirebaseStorageService firebaseStorageService;
+
+    @Transactional(readOnly = true)
     public List<Categoria> getCategorias(boolean activo) {
         if (activo) {
             return categoriaRepository.findByActivoTrue();
@@ -33,17 +29,14 @@ public class CategoriaService {
     }
     
     @Transactional(readOnly = true)
-    public Optional<Categoria> getCategoria(Integer idCategoria) {
+    public Optional<Categoria> getCategoria(Long idCategoria) {
         return categoriaRepository.findById(idCategoria);
     }
-
-    @Autowired
-    private FirebaseStorageService firebaseStorageService;
 
     @Transactional
     public void save(Categoria categoria, MultipartFile imagenFile) {
         categoria = categoriaRepository.save(categoria);
-        if (!imagenFile.isEmpty()) { //Si no está vacío... pasaron una imagen...            
+        if (!imagenFile.isEmpty()) {            
             try {
                 String rutaImagen = firebaseStorageService.uploadImage(
                         imagenFile, "categoria",
@@ -51,27 +44,21 @@ public class CategoriaService {
                 categoria.setRutaImagen(rutaImagen);
                 categoriaRepository.save(categoria);
             } catch (IOException e) {
-
+                // Log del error
+                System.err.println("Error al subir imagen: " + e.getMessage());
             }
         }
     }
 
     @Transactional
-    public void delete(Integer idCategoria) {
-        // Verifica si la categoría existe antes de intentar eliminarlo
+    public void delete(Long idCategoria) {
         if (!categoriaRepository.existsById(idCategoria)) {
-            // Lanza una excepción para indicar que el usuario no fue encontrado
             throw new IllegalArgumentException("La categoría con ID " + idCategoria + " no existe.");
         }
         try {
             categoriaRepository.deleteById(idCategoria);
         } catch (DataIntegrityViolationException e) {
-            // Lanza una nueva excepción para encapsular el problema de integridad de datos
             throw new IllegalStateException("No se puede eliminar la categoria. Tiene datos asociados.", e);
         }
     }
-
 }
-    
-
-    
