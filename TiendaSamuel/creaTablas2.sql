@@ -1,7 +1,6 @@
 /*
-  Script de creación de base de datos para TechShop
-  Este script crea el esquema, tablas, usuarios, y
-  carga datos de ejemplo.
+  Script de creación de base de datos para TechShop - VERSIÓN CORREGIDA
+  Configurada para funcionar con Spring Security dinámico de la Semana 10
 */
 -- Sección de administración (ejecutar una vez en un entorno de desarrollo)
 drop database if exists techshop;
@@ -13,12 +12,11 @@ CREATE database techshop
   DEFAULT CHARACTER SET utf8mb4
   DEFAULT COLLATE utf8mb4_unicode_ci;
 
--- Creación de usuarios con contraseñas seguras (idealmente asignadas fuera del script)
+-- Creación de usuarios con contraseñas seguras
 create user 'usuario_prueba'@'%' identified by 'Usuar1o_Clave.';
 create user 'usuario_reportes'@'%' identified by 'Usuar1o_Reportes.';
 
 -- Asignación de permisos
--- Se otorgan permisos específicos en lugar de todos los permisos a todas las tablas futuras
 grant select, insert, update, delete on techshop.* to 'usuario_prueba'@'%';
 grant select on techshop.* to 'usuario_reportes'@'%';
 flush privileges;
@@ -221,39 +219,53 @@ insert into rol (rol) values ('ADMIN'), ('VENDEDOR'), ('USER');
 insert into usuario_rol (id_usuario, id_rol) values
  (1,1), (1,2), (1,3),(2,2),(2,3),(3,3);
 
--- Inserción de rutas con roles específicos
-INSERT INTO ruta (ruta, id_rol) VALUES 
-('/producto/nuevo', 1),
-('/producto/guardar', 1),
-('/producto/modificar/**', 1),
-('/producto/eliminar/**', 1),
-('/categoria/nuevo', 1),
-('/categoria/guardar', 1),
-('/categoria/modificar/**', 1),
-('/categoria/eliminar/**', 1),
-('/usuario/**', 1),
-('/constante/**', 1),
-('/role/**', 1),
-('/usuario_role/**', 1),
-('/ruta/**', 1),
-('/producto/listado', 2),
-('/categoria/listado', 2),
-('/pruebas/**', 2),
-('/reportes/**', 2),
-('/facturar/carrito', 3),
-('/payment/**', 3);
+-- ✅ RUTAS COMPLETAS Y CORREGIDAS para Spring Security dinámico
+-- Eliminar rutas existentes
+DELETE FROM ruta;
 
--- Inserción de rutas que no requieren rol
-INSERT INTO ruta (ruta,requiere_rol) VALUES 
-('/',false),
-('/index',false),
-('/errores/**',false),
-('/carrito/**',false),
-('/registro/**',false),
-('/403',false),
-('/fav/**',false),
-('/js/**',false),
-('/webjars/**',false);
+-- Rutas públicas (no requieren autenticación)
+INSERT INTO ruta (ruta, requiere_rol) VALUES 
+('/', 0),
+('/index', 0),
+('/login', 0),
+('/logout', 0),
+('/registro/**', 0),
+('/acceso_denegado', 0),
+('/webjars/**', 0),
+('/images/**', 0),
+('/js/**', 0),
+('/fav/**', 0),
+('/carrito/**', 0),
+('/consultas/**', 0);  -- ✅ AGREGADO: Consultas como ruta pública
+
+-- Rutas para ADMIN (id_rol = 1)
+INSERT INTO ruta (ruta, id_rol, requiere_rol) VALUES 
+('/categoria/listado', 1, 1),
+('/categoria/nuevo', 1, 1),
+('/categoria/guardar', 1, 1),
+('/categoria/modificar/**', 1, 1),
+('/categoria/eliminar/**', 1, 1),
+('/producto/listado', 1, 1),
+('/producto/nuevo', 1, 1),
+('/producto/guardar', 1, 1),
+('/producto/modificar/**', 1, 1),
+('/producto/eliminar/**', 1, 1),
+('/usuario/listado', 1, 1),
+('/usuario/nuevo', 1, 1),
+('/usuario/guardar', 1, 1),
+('/usuario/modificar/**', 1, 1),
+('/usuario/eliminar/**', 1, 1);
+
+-- Rutas para VENDEDOR (id_rol = 2)
+INSERT INTO ruta (ruta, id_rol, requiere_rol) VALUES 
+('/categoria/listado', 2, 1),
+('/producto/listado', 2, 1),
+('/consultas/listado', 2, 1);  -- ✅ AGREGADO: Consultas para vendedor
+
+-- Rutas para USER (id_rol = 3)
+INSERT INTO ruta (ruta, id_rol, requiere_rol) VALUES 
+('/consultas/listado', 3, 1),  -- ✅ AGREGADO: Consultas para usuario normal
+('/facturar/carrito', 3, 1);
 
 -- Inserción de constantes de la aplicación
 INSERT INTO constante (atributo,valor) VALUES 
@@ -261,12 +273,3 @@ INSERT INTO constante (atributo,valor) VALUES
 ('dolar','520.75'),
 ('url_paypal_cancel','http://localhost/payment/cancel'),
 ('url_paypal_success','http://localhost/payment/success');
-
-
-/* estos valores por seguridad deben quedar como variables de entorno 
-('paypal.client-id','AaDNEUcELb-wQi6_MOboN0a1Ug4BnD4Z2T2-_KIoDjIb8Rif6525nvRhDu-MS-YdKQ8PJqZi7R6T6e_k'),
-('paypal.client-secret','EKBpJ1oXlwfcp60KyF9ednFM4i9G_RkzgPCpDXo_NbQbaO_bICxhs_a_mnepi7524BQeK_qdNPRmLt71'),
-('paypal.mode','sandbox'),
-('currency','USD'),
-('method','sale'),
-('descripcion','Facturación en TechShop'); */
